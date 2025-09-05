@@ -18,7 +18,8 @@
 
 #define JSMN_PARENT_LINKS
 #define JSMN_HEADER
-#include <jsmn/jsmn.h>
+#include "..\jsmn\jsmn.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -26,6 +27,8 @@
 extern "C"
 {
 #endif
+
+
 
 #define OS_SUCCESS  0
 #define OS_FAIL     -1
@@ -40,6 +43,7 @@ typedef struct {
 	json_tok_t *cur;
 	int num_tokens;
 } jparse_ctx_t;
+
 
 int json_parse_start(jparse_ctx_t *jctx, const char *js, int len);
 int json_parse_end(jparse_ctx_t *jctx);

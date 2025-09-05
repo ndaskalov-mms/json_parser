@@ -13,6 +13,10 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+
+#define _CRT_SECURE_NO_WARNINGS
+
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -20,8 +24,9 @@
 #define JSMN_PARENT_LINKS
 #define JSMN_STRICT
 #define JSMN_STATIC
-#include <jsmn/jsmn.h>
-#include <json_parser.h>
+#include "..\jsmn\jsmn.h"
+#include "..\include\json_parser.h"
+
 
 static bool token_matches_str(jparse_ctx_t *ctx, json_tok_t *tok, const char *str)
 {
