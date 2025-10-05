@@ -123,10 +123,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\json_parser.c" />
     <ClCompile Include="tests\main.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\json_parser-code.h" />
     <ClInclude Include="include\json_parser.h" />
     <ClInclude Include="jsmn\jsmn.h" />
   </ItemGroup>

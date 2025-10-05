@@ -1,34 +1,9 @@
-/*
- *    Copyright 2020 Piyush Shah <shahpiyushv@gmail.com>
- *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- */
 
 #include <stdio.h>
 #include <string.h>
-//#include <C:\source\repos\json-parser\include\json_parser.h>
-#include "..\include\json_parser.h"
+#include "..\include\json_parser-code.h"
 
-//#define json_test_str	"{\n\"str_val\" :    \"JSON Parser\",\n" \
-//			"\t\"float_val\" : 2.0,\n" \
-//			"\"int_val\" : 2017,\n" \
-//			"\"bool_val\" : false,\n" \
-//			"\"supported_el\" :\t [\"bool\",\"int\","\
-//			"\"float\",\"str\"" \
-//			",\"object\",\"array\"],\n" \
-//			"\"features\" : { \"objects\":true, "\
-//			"\"arrays\":\"yes\"},\n"\
-//			"\"int_64\":109174583252}"
+// Sample JSON configuration for testing
 
 #define alarm_config_json "{\n\
   \"zones\": [\n\
@@ -228,7 +203,67 @@
 
 // #define alarm_config_json "{\"zones\":[{\"zName\":\"Front\"},{\"zName\":\"Back\"}]}"
 
-int main(int argc, char** argv)
+void parse_global_options(jparse_ctx_t* jctx) {
+    char str_val[128];
+    int int_val;
+    bool bool_val;
+
+    // The json_obj_get_object for "globalOptions" is called before this function
+    printf("\n===== Global Options =====\n");
+
+    if (json_obj_get_int(jctx, "MaxSlaves", &int_val) == OS_SUCCESS)
+        printf("MaxSlaves: %d\n", int_val);
+
+    if (json_obj_get_bool(jctx, "RestrSprvsL", &bool_val) == OS_SUCCESS)
+        printf("RestrSprvsL: %s\n", bool_val ? "true" : "false");
+
+    if (json_obj_get_bool(jctx, "RestrTamper", &bool_val) == OS_SUCCESS)
+        printf("RestrTamper: %s\n", bool_val ? "true" : "false");
+
+    if (json_obj_get_string(jctx, "TamperOpts", str_val, sizeof(str_val)) == OS_SUCCESS)
+        printf("TamperOpts: %s\n", str_val);
+}
+
+void parse_zone(jparse_ctx_t* jctx) {
+    char str_val[128];
+    int int_val;
+    bool bool_val;
+
+    if (json_obj_get_int(jctx, "zID", &int_val) == OS_SUCCESS)
+        printf("  ID: %d\n", int_val);
+
+    if (json_obj_get_string(jctx, "zName", str_val, sizeof(str_val)) == OS_SUCCESS)
+        printf("  Name: %s\n", str_val);
+
+    if (json_obj_get_string(jctx, "zType", str_val, sizeof(str_val)) == OS_SUCCESS)
+        printf("  Type: %s\n", str_val);
+
+    if (json_obj_get_int(jctx, "zPartn", &int_val) == OS_SUCCESS)
+        printf("  Partition: %d\n", int_val);
+
+    if (json_obj_get_bool(jctx, "zBypEn", &bool_val) == OS_SUCCESS)
+        printf("  Bypass Enabled: %s\n", bool_val ? "true" : "false");
+}
+
+void parse_partition(jparse_ctx_t* jctx) {
+    char str_val[128];
+    int int_val;
+    bool bool_val;
+
+    if (json_obj_get_string(jctx, "pName", str_val, sizeof(str_val)) == OS_SUCCESS)
+        printf("  Name: %s\n", str_val);
+
+    if (json_obj_get_int(jctx, "pIdx", &int_val) == OS_SUCCESS)
+        printf("  Index: %d\n", int_val);
+
+    if (json_obj_get_int(jctx, "pExitDly", &int_val) == OS_SUCCESS)
+        printf("  Exit Delay: %d seconds\n", int_val);
+
+    if (json_obj_get_int(jctx, "pED1Intvl", &int_val) == OS_SUCCESS)
+        printf("  Entry Delay 1: %d seconds\n", int_val);
+}
+
+int parseJSON()
 {
     jparse_ctx_t jctx, tmp_jctx;
 
@@ -244,20 +279,7 @@ int main(int argc, char** argv)
 
     // Parse and display global options
     if (json_obj_get_object(&jctx, "globalOptions") == OS_SUCCESS) {
-        printf("\n===== Global Options =====\n");
-
-        if (json_obj_get_int(&jctx, "MaxSlaves", &int_val) == OS_SUCCESS)
-            printf("MaxSlaves: %d\n", int_val);
-
-        if (json_obj_get_bool(&jctx, "RestrSprvsL", &bool_val) == OS_SUCCESS)
-            printf("RestrSprvsL: %s\n", bool_val ? "true" : "false");
-
-        if (json_obj_get_bool(&jctx, "RestrTamper", &bool_val) == OS_SUCCESS)
-            printf("RestrTamper: %s\n", bool_val ? "true" : "false");
-
-        if (json_obj_get_string(&jctx, "TamperOpts", str_val, sizeof(str_val)) == OS_SUCCESS)
-            printf("TamperOpts: %s\n", str_val);
-
+        parse_global_options(&jctx);
         json_obj_leave_object(&jctx);
     }
 
@@ -266,29 +288,17 @@ int main(int argc, char** argv)
         printf("\n===== Zones (%d) =====\n", num_elem);
         tmp_jctx = jctx;                                // needed to properly parse arrays
         for (int i = 0; i < num_elem; i++) {
-			jctx = tmp_jctx;
+		    jctx = tmp_jctx;
             if (json_arr_get_object(&jctx, i) == OS_SUCCESS) {
                 printf("\nZone %d:\n", i + 1);
-
-                if (json_obj_get_int(&jctx, "zID", &int_val) == OS_SUCCESS)
-                    printf("  ID: %d\n", int_val);
-
-                if (json_obj_get_string(&jctx, "zName", str_val, sizeof(str_val)) == OS_SUCCESS)
-                    printf("  Name: %s\n", str_val);
-
-                if (json_obj_get_string(&jctx, "zType", str_val, sizeof(str_val)) == OS_SUCCESS)
-                    printf("  Type: %s\n", str_val);
-
-                if (json_obj_get_int(&jctx, "zPartn", &int_val) == OS_SUCCESS)
-                    printf("  Partition: %d\n", int_val);
-
-                if (json_obj_get_bool(&jctx, "zBypEn", &bool_val) == OS_SUCCESS)
-                    printf("  Bypass Enabled: %s\n", bool_val ? "true" : "false");
-
+                parse_zone(&jctx);
                 json_obj_leave_object(&jctx);
             }
+            else
+                printf("\nInvalid Zone %d:\n", i + 1);
+
         }
-       json_obj_leave_array(&jctx);
+        json_obj_leave_array(&jctx);
     }
 
     // Parse and display partitions
@@ -299,19 +309,7 @@ int main(int argc, char** argv)
             jctx = tmp_jctx;
             if (json_arr_get_object(&jctx, i) == OS_SUCCESS) {
                 printf("\nPartition %d:\n", i + 1);
-
-                if (json_obj_get_string(&jctx, "pName", str_val, sizeof(str_val)) == OS_SUCCESS)
-                    printf("  Name: %s\n", str_val);
-
-                if (json_obj_get_int(&jctx, "pIdx", &int_val) == OS_SUCCESS)
-                    printf("  Index: %d\n", int_val);
-
-                if (json_obj_get_int(&jctx, "pExitDly", &int_val) == OS_SUCCESS)
-                    printf("  Exit Delay: %d seconds\n", int_val);
-
-                if (json_obj_get_int(&jctx, "pED1Intvl", &int_val) == OS_SUCCESS)
-                    printf("  Entry Delay 1: %d seconds\n", int_val);
-
+                parse_partition(&jctx);
                 json_obj_leave_object(&jctx);
             }
         }
@@ -370,54 +368,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
+int main(int argc, char** argv) {
+	return parseJSON();
+}
 
-//int main(int argc, char **argv)
-//{
-//	jparse_ctx_t jctx;
-//	int ret = json_parse_start(&jctx, json_test_str, strlen(json_test_str));
-//	if (ret != OS_SUCCESS) {
-//		printf("Parser failed\n");
-//		return -1;
-//	}
-//	char str_val[64];
-//	int int_val, num_elem;
-//	int64_t int64_val;
-//	bool bool_val;
-//	float float_val;
-//
-//	if (json_obj_get_string(&jctx, "str_val", str_val, sizeof(str_val)) == OS_SUCCESS)
-//		printf("str_val %s\n", str_val);
-//
-//	if (json_obj_get_float(&jctx, "float_val", &float_val) == OS_SUCCESS)
-//		printf("float_val %f\n", float_val);
-//
-//	if (json_obj_get_int(&jctx, "int_val", &int_val) == OS_SUCCESS)
-//		printf("int_val %d\n", int_val);
-//
-//	if (json_obj_get_bool(&jctx, "bool_val", &bool_val) == OS_SUCCESS)
-//		printf("bool_val %s\n", bool_val ? "true" : "false");
-//
-//	if (json_obj_get_array(&jctx, "supported_el", &num_elem) == OS_SUCCESS) {
-//		printf("Array has %d elements\n", num_elem);
-//		int i;
-//		for (i = 0; i < num_elem; i++) {
-//			json_arr_get_string(&jctx, i, str_val, sizeof(str_val));
-//			printf("index %d: %s\n", i, str_val);
-//		}
-//		json_obj_leave_array(&jctx);
-//	}
-//	if (json_obj_get_object(&jctx, "features") == OS_SUCCESS) {
-//		printf("Found object\n");
-//		if (json_obj_get_bool(&jctx, "objects", &bool_val) == OS_SUCCESS)
-//			printf("objects %s\n", bool_val ? "true" : "false");
-//		if (json_obj_get_string(&jctx, "arrays", str_val, sizeof(str_val)) == OS_SUCCESS)
-//			printf("arrays %s\n", str_val);
-//		json_obj_leave_object(&jctx);
-//	}
-//	if (json_obj_get_int64(&jctx, "int_64", &int64_val) == OS_SUCCESS)
-//		printf("int64_val %lld\n", int64_val);
-//
-//	json_parse_end(&jctx);
-//	return 0;
-//
-//}

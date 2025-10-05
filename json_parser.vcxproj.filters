@@ -18,15 +18,15 @@
     <ClCompile Include="tests\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\json_parser.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\json_parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="jsmn\jsmn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\json_parser-code.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

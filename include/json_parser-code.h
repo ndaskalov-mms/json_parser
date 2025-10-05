@@ -27,6 +27,7 @@
 #include "..\jsmn\jsmn.h"
 #include "..\include\json_parser.h"
 
+#define _CRT_SECURE_NO_WARNINGS
 
 static bool token_matches_str(jparse_ctx_t *ctx, json_tok_t *tok, const char *str)
 {
@@ -100,7 +101,8 @@ static int json_tok_to_string(jparse_ctx_t *jctx, json_tok_t *tok, char *val, in
 {
 	if ((tok->end - tok->start) > (size - 1))
 		return -OS_FAIL;
-	strncpy(val, jctx->js + tok->start, tok->end - tok->start);
+	//strncpy(val, jctx->js + tok->start, tok->end - tok->start);
+	strncpy_s(val, size, jctx->js + tok->start, tok->end - tok->start);
 	val[tok->end - tok->start] = 0;
 	return OS_SUCCESS;
 }
@@ -379,7 +381,7 @@ int json_parse_start(jparse_ctx_t *jctx, const char *js, int len)
 	if (num_tokens <= 0)
 		return -OS_FAIL;
 	jctx->num_tokens = num_tokens;
-	jctx->tokens = calloc(num_tokens, sizeof(json_tok_t));
+	jctx->tokens = (json_tok_t*)calloc(num_tokens, sizeof(json_tok_t));
 	if (!jctx->tokens)
 		return -OS_FAIL;
 	jctx->js = js;
